@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#313131"
+    android:orientation="vertical"
+    tools:ignore="MissingDefaultResource">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1.6"
+        android:background="@drawable/bg_screen"
+        android:padding="24dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:orientation="vertical"
+            android:gravity="end">
+
+            <TextView
+                android:id="@+id/tvExpression"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text=""
+                android:textColor="#313131"
+                android:textSize="48sp"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="2"
+                android:autoSizeTextType="uniform"/>
+
+            <TextView
+                android:id="@+id/tvResult"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="0"
+                android:textColor="#7A7A7A"
+                android:textSize="32sp"
+                android:fontFamily="sans-serif"
+                android:maxLines="1"/>
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/btnHistory"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:src="@drawable/ic_history_pixel"
+            android:contentDescription="Lịch sử tính toán"
+            android:scaleType="centerInside"
+            android:padding="10dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
+
+    </RelativeLayout>
+
+    <GridLayout
+        android:id="@+id/mainGrid"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3.4"
+        android:padding="16dp"
+        android:columnCount="4"
+        android:rowCount="5">
+
+        <Button android:text="AC" style="@style/btnBlack"/>
+        <Button android:text="( )" style="@style/btnPink"/>
+        <Button android:text="%" style="@style/btnPink"/>
+        <Button android:text="÷" style="@style/btnPink"/>
+
+        <Button android:text="7" style="@style/btnGray"/>
+        <Button android:text="8" style="@style/btnGray"/>
+        <Button android:text="9" style="@style/btnGray"/>
+        <Button android:text="×" style="@style/btnPink"/>
+
+        <Button android:text="4" style="@style/btnGray"/>
+        <Button android:text="5" style="@style/btnGray"/>
+        <Button android:text="6" style="@style/btnGray"/>
+        <Button android:text="-" style="@style/btnPink"/>
+
+        <Button android:text="1" style="@style/btnGray"/>
+        <Button android:text="2" style="@style/btnGray"/>
+        <Button android:text="3" style="@style/btnGray"/>
+        <Button android:text="+" style="@style/btnPink"/>
+
+        <Button android:text="0" style="@style/btnGray"/>
+        <Button android:text="." style="@style/btnGray"/>
+        <Button android:text="⌫" style="@style/btnGray"/>
+        <Button android:text="=" style="@style/btnPurple"/>
+
+    </GridLayout>
+</LinearLayout>
