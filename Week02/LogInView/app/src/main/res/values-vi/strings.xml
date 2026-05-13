@@ -1,0 +1,25 @@
+<resources>
+    <string name="signin_title">Đăng nhập</string>
+    <string name="login_button">Đăng nhập</string>
+    <string name="sign_up">Đăng ký</string>
+    <string name="email_label">Email</string>
+    <string name="email_hint">demo@email.com</string>
+    <string name="password_label">Mật khẩu</string>
+    <string name="password_hint">nhập mật khẩu của bạn</string>
+    <string name="remember_me">Ghi nhớ tôi</string>
+    <string name="forgot_password">Quên mật khẩu?</string>
+    <string name="no_account">Chưa có tài khoản ?</string>
+    <string name="signup_title">Đăng ký</string>
+    <string name="create_account">Tạo tài khoản</string>
+    <string name="already_have_account">Đã có tài khoản!</string>
+    <string name="phone_label">Số điện thoại</string>
+    <string name="phone_hint">+00 000-0000-000</string>
+    <string name="confirm_password_label">Xác nhận mật khẩu</string>
+    <string name="confirm_password_hint">Xác nhận mật khẩu của bạn</string>
+
+    <!-- Giữ các chuỗi cũ để tương thích nếu cần -->
+    <string name="login_title">Đăng nhập</string>
+    <string name="username_hint">Tên đăng nhập hoặc email</string>
+    <string name="log_in">ĐĂNG NHẬP</string>
+    <string name="login_with">Đăng nhập với</string>
+</resources>

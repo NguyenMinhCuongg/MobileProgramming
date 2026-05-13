@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">LogInView</string>
+    <string name="signin_title">Sign in</string>
+    <string name="login_button">Login</string>
+    <string name="sign_up">Sign up</string>
+    <string name="email_label">Email</string>
+    <string name="email_hint">demo@email.com</string>
+    <string name="password_label">Password</string>
+    <string name="password_hint">enter your password</string>
+    <string name="remember_me">Remember Me</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="no_account">Don’t have an Account ?</string>
+    <string name="signup_title">Sign up</string>
+    <string name="create_account">Create Account</string>
+    <string name="already_have_account">Already have an Account!</string>
+    <string name="phone_label">Phone no</string>
+    <string name="phone_hint">+00 000-0000-000</string>
+    <string name="confirm_password_label">Confirm Password</string>
+    <string name="confirm_password_hint">Confirm your password</string>
+
+    <!-- Old strings kept for compatibility if needed -->
+    <string name="login_title">Login</string>
+    <string name="username_hint">Username or email address</string>
+    <string name="log_in">LOG IN</string>
+    <string name="login_with">Login with</string>
+</resources>
