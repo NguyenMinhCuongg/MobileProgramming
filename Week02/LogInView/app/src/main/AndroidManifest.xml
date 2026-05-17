@@ -21,6 +21,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".SignUpActivity" />
+        <activity android:name=".BookDetailActivity" />
+        <activity android:name=".CategoryActivity" />
+        <activity android:name=".PlayerActivity" />
     </application>
 
 </manifest>

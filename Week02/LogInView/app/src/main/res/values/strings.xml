@@ -18,6 +18,30 @@
     <string name="confirm_password_label">Confirm Password</string>
     <string name="confirm_password_hint">Confirm your password</string>
 
+    <!-- Book Detail Strings -->
+    <string name="book_detail_title">Book Details</string>
+    <string name="book_name_sample">The Alchemist</string>
+    <string name="book_author_sample">Paulo Coelho</string>
+    <string name="book_rating_sample">4.8 (1.2k reviews)</string>
+    <string name="book_summary_label">Summary</string>
+    <string name="book_summary_sample">The Alchemist is a classic novel in which a boy named Santiago embarks on a journey seeking treasure in the Egyptian pyramids after having a recurring dream about it and on the way meets mentors, falls in love, and most importantly, learns the true importance of who he is and how to improve himself and focus on what really matters in life.</string>
+    <string name="btn_listen_now">Listen Now</string>
+    <string name="btn_add_to_library">Add to Library</string>
+
+    <!-- Category Strings -->
+    <string name="category_title">Categories</string>
+    <string name="cat_business">Business</string>
+    <string name="cat_self_help">Self-Help</string>
+    <string name="cat_fiction">Fiction</string>
+    <string name="cat_psychology">Psychology</string>
+    <string name="cat_biography">Biography</string>
+
+    <!-- Player Strings -->
+    <string name="player_title">Now Playing</string>
+    <string name="playing_speed">1.0x</string>
+    <string name="playing_timer">Sleep Timer</string>
+    <string name="playing_chapter">Chapter 1: The Beginning</string>
+
     <!-- Old strings kept for compatibility if needed -->
     <string name="login_title">Login</string>
     <string name="username_hint">Username or email address</string>

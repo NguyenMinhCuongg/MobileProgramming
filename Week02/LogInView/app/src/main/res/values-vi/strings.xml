@@ -17,6 +17,30 @@
     <string name="confirm_password_label">Xác nhận mật khẩu</string>
     <string name="confirm_password_hint">Xác nhận mật khẩu của bạn</string>
 
+    <!-- Book Detail Strings -->
+    <string name="book_detail_title">Chi tiết sách</string>
+    <string name="book_name_sample">Nhà Giả Kim</string>
+    <string name="book_author_sample">Paulo Coelho</string>
+    <string name="book_rating_sample">4.8 (1.2k đánh giá)</string>
+    <string name="book_summary_label">Tóm tắt nội dung</string>
+    <string name="book_summary_sample">Nhà giả kim là một cuốn tiểu thuyết kinh điển, kể về hành trình của Santiago, một cậu bé chăn cừu, đi tìm kho báu tại kim tự tháp Ai Cập sau khi có những giấc mơ lặp đi lặp lại. Trên đường đi, cậu gặp những người thầy, tìm thấy tình yêu, và quan trọng nhất, học được tầm quan trọng của việc hiểu rõ bản thân và tập trung vào những điều thực sự quan trọng trong cuộc sống.</string>
+    <string name="btn_listen_now">Nghe ngay</string>
+    <string name="btn_add_to_library">Thêm vào thư viện</string>
+
+    <!-- Category Strings -->
+    <string name="category_title">Danh mục</string>
+    <string name="cat_business">Kinh doanh</string>
+    <string name="cat_self_help">Phát triển bản thân</string>
+    <string name="cat_fiction">Văn học</string>
+    <string name="cat_psychology">Tâm lý học</string>
+    <string name="cat_biography">Tiểu sử</string>
+
+    <!-- Player Strings -->
+    <string name="player_title">Đang phát</string>
+    <string name="playing_speed">Tốc độ 1.0x</string>
+    <string name="playing_timer">Hẹn giờ ngủ</string>
+    <string name="playing_chapter">Chương 1: Khởi đầu</string>
+
     <!-- Giữ các chuỗi cũ để tương thích nếu cần -->
     <string name="login_title">Đăng nhập</string>
     <string name="username_hint">Tên đăng nhập hoặc email</string>
