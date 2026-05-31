@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="grey">#BDBDBD</color>
+    <color name="blue_btn">#5C6BC0</color>
+    <color name="google_red">#DB4437</color>
+    <color name="github_dark">#333333</color>
+    <color name="twitter_blue">#1DA1F2</color>
+    <color name="facebook_blue">#4267B2</color>
+    <color name="hint_color">#9E9E9E</color>
+
+    <!-- Colors from CSS -->
+    <color name="primary_pink">#FF8383</color>
+    <color name="background_light">#FFFCFC</color>
+    <color name="text_black">#212121</color>
+    <color name="text_dark_grey">#424242</color>
+    <color name="text_medium_grey">#616161</color>
+    <color name="text_light_grey">#BDBDBD</color>
+</resources>

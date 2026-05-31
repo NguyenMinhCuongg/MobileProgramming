@@ -1,23 +1,25 @@
 package ute.buiquanghuy.maytinh;
 
-import android.app.Activity;
-import android.app.AlertDialog;
+
+import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-import java.util.ArrayList;
+import androidx.appcompat.app.AppCompatActivity;
 
-public class MainActivity extends Activity {
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
+
+public class MainActivity extends AppCompatActivity {
 
     TextView tvExpression, tvResult;
-    ImageView btnHistory;
     String expression = "";
     boolean isResultShown = false;
-    ArrayList<String> historyList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,42 +28,16 @@ public class MainActivity extends Activity {
 
         tvExpression = findViewById(R.id.tvExpression);
         tvResult = findViewById(R.id.tvResult);
-        btnHistory = findViewById(R.id.btnHistory);
         GridLayout grid = findViewById(R.id.mainGrid);
 
-        btnHistory.setOnClickListener(v -> showHistoryDialog());
-
-        for (int i = 0; i < grid.getChildCount(); i++) {
-            View v = grid.getChildAt(i);
-            if (v instanceof Button) {
-                v.setOnClickListener(this::onClick);
+        if (grid != null) {
+            for (int i = 0; i < grid.getChildCount(); i++) {
+                View v = grid.getChildAt(i);
+                if (v instanceof Button) {
+                    v.setOnClickListener(this::onClick);
+                }
             }
         }
-    }
-
-    private void showHistoryDialog() {
-        if (historyList.isEmpty()) {
-            Toast.makeText(this, "Chưa có lịch sử tính toán", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        String[] historyArray = historyList.toArray(new String[0]);
-        new AlertDialog.Builder(this)
-                .setTitle("Lịch sử tính toán")
-                .setItems(historyArray, (dialog, which) -> {
-                    String selected = historyArray[which];
-                    String resultOnly = selected.substring(selected.lastIndexOf("=") + 1).trim();
-                    expression = resultOnly;
-                    tvExpression.setText(expression);
-                    tvResult.setText("");
-                    isResultShown = true;
-                })
-                .setPositiveButton("Đóng", null)
-                .setNeutralButton("Xóa lịch sử", (dialog, which) -> {
-                    historyList.clear();
-                    Toast.makeText(this, "Đã xóa lịch sử", Toast.LENGTH_SHORT).show();
-                })
-                .show();
     }
 
     private void onClick(View v) {
@@ -75,7 +51,6 @@ public class MainActivity extends Activity {
                 tvResult.setText("0");
                 isResultShown = false;
                 break;
-
             case "⌫":
                 if (isResultShown) {
                     isResultShown = false;
@@ -85,34 +60,24 @@ public class MainActivity extends Activity {
                 tvExpression.setText(expression);
                 liveCalculate();
                 break;
-
             case "( )":
                 handleParentheses();
                 break;
-
             case "=":
                 if (!expression.isEmpty()) {
                     calculateFinal();
                     isResultShown = true;
                 }
                 break;
-
             case "+": case "-": case "×": case "÷": case "%":
                 isResultShown = false;
                 handleOperator(text);
                 break;
-
             default:
                 if (isResultShown) {
                     expression = text;
                     isResultShown = false;
                 } else {
-                    if (!expression.isEmpty()) {
-                        char last = expression.charAt(expression.length() - 1);
-                        if (last == ')' && !text.equals(".")) {
-                            expression += "×";
-                        }
-                    }
                     expression += text;
                 }
                 tvExpression.setText(expression);
@@ -123,33 +88,18 @@ public class MainActivity extends Activity {
 
     private void handleParentheses() {
         if (isResultShown) {
-            expression = "(";
+            expression = "";
             isResultShown = false;
-            tvExpression.setText(expression);
-            liveCalculate();
-            return;
         }
-
         int open = 0, close = 0;
         for (char c : expression.toCharArray()) {
             if (c == '(') open++;
             if (c == ')') close++;
         }
-
-        if (expression.isEmpty()) {
+        if (open == close || expression.endsWith("(")) {
             expression += "(";
         } else {
-            char last = expression.charAt(expression.length() - 1);
-
-            if (open > close && (Character.isDigit(last) || last == ')' || last == '.')) {
-                expression += ")";
-            } else {
-                if (Character.isDigit(last) || last == ')' || last == '.') {
-                    expression += "×(";
-                } else {
-                    expression += "(";
-                }
-            }
+            expression += ")";
         }
         tvExpression.setText(expression);
         liveCalculate();
@@ -158,16 +108,7 @@ public class MainActivity extends Activity {
     private void handleOperator(String op) {
         if (!expression.isEmpty()) {
             char last = expression.charAt(expression.length() - 1);
-
-            if (last == '(') {
-                if (op.equals("-")) {
-                    expression += op;
-                    tvExpression.setText(expression);
-                }
-                return;
-            }
-
-            if ("+-×÷%".indexOf(last) != -1) {
+            if ("+-(×÷%".indexOf(last) != -1) {
                 expression = expression.substring(0, expression.length() - 1);
             }
             expression += op;
@@ -178,14 +119,27 @@ public class MainActivity extends Activity {
         }
     }
 
+    private String formatResult(BigDecimal bd) {
+        if (bd.compareTo(BigDecimal.ZERO) == 0) return "0";
+
+        bd = bd.stripTrailingZeros();
+        String plain = bd.toPlainString();
+
+        if (plain.length() > 15) {
+            DecimalFormat df = new DecimalFormat("0.########E0", new DecimalFormatSymbols(Locale.US));
+            return df.format(bd);
+        }
+        return plain;
+    }
+
     private void liveCalculate() {
         if (expression.isEmpty()) {
             tvResult.setText("0");
             return;
         }
         try {
-            double result = eval(formatExpression(expression));
-            tvResult.setText(result == (long) result ? String.valueOf((long) result) : String.valueOf(result));
+            BigDecimal result = eval(formatExpression(expression));
+            tvResult.setText(formatResult(result));
         } catch (Exception e) {
             tvResult.setText("");
         }
@@ -193,10 +147,8 @@ public class MainActivity extends Activity {
 
     private void calculateFinal() {
         try {
-            double result = eval(formatExpression(expression));
-            String finalRes = result == (long) result ? String.valueOf((long) result) : String.valueOf(result);
-            historyList.add(0, expression + " = " + finalRes);
-            expression = finalRes;
+            BigDecimal result = eval(formatExpression(expression));
+            expression = formatResult(result);
             tvExpression.setText(expression);
             tvResult.setText("");
         } catch (Exception e) {
@@ -205,44 +157,96 @@ public class MainActivity extends Activity {
     }
 
     private String formatExpression(String exp) {
-        return exp.replaceAll("(\\d+)%", "($1/100.0)").replace("×", "*").replace("÷", "/");
+        return exp.replaceAll("([0-9.E+-]+)%", "($1/100.0)")
+                .replace("×", "*")
+                .replace("÷", "/");
     }
 
-    public static double eval(final String str) {
+    public static BigDecimal eval(final String str) {
         return new Object() {
             int pos = -1, ch;
-            void nextChar() { ch = (++pos < str.length()) ? str.charAt(pos) : -1; }
+
+            void nextChar() {
+                ch = (++pos < str.length()) ? str.charAt(pos) : -1;
+            }
+
             boolean eat(int charToEat) {
                 while (ch == ' ') nextChar();
-                if (ch == charToEat) { nextChar(); return true; }
+                if (ch == charToEat) {
+                    nextChar();
+                    return true;
+                }
                 return false;
             }
-            double parse() { nextChar(); return parseExpression(); }
-            double parseExpression() {
-                double x = parseTerm();
+
+            BigDecimal parse() {
+                nextChar();
+                BigDecimal x = parseExpression();
+                if (x == null) x = BigDecimal.ZERO;
+                return x;
+            }
+
+            BigDecimal parseExpression() {
+                BigDecimal x = parseTerm();
                 for (;;) {
-                    if (eat('+')) x += parseTerm();
-                    else if (eat('-')) x -= parseTerm();
-                    else return x;
+                    if (eat('+')) {
+                        BigDecimal y = parseTerm();
+                        if (x == null) x = y;
+                        else if (y != null) x = x.add(y, MathContext.DECIMAL128);
+                    } else if (eat('-')) {
+                        BigDecimal y = parseTerm();
+                        if (x == null) x = (y != null) ? y.negate() : null;
+                        else if (y != null) x = x.subtract(y, MathContext.DECIMAL128);
+                    } else return x;
                 }
             }
-            double parseTerm() {
-                double x = parseFactor();
+
+            BigDecimal parseTerm() {
+                BigDecimal x = parseFactor();
                 for (;;) {
-                    if (eat('*')) x *= parseFactor();
-                    else if (eat('/')) x /= parseFactor();
-                    else return x;
+                    if (eat('*')) {
+                        BigDecimal y = parseFactor();
+                        if (x == null) x = y;
+                        else if (y != null) x = x.multiply(y, MathContext.DECIMAL128);
+                    } else if (eat('/')) {
+                        BigDecimal y = parseFactor();
+                        if (x == null) x = y;
+                        else if (y != null) {
+                            if (y.compareTo(BigDecimal.ZERO) == 0) {
+                                throw new ArithmeticException("Divide by zero");
+                            }
+                            x = x.divide(y, MathContext.DECIMAL128);
+                        }
+                    } else return x;
                 }
             }
-            double parseFactor() {
+
+            BigDecimal parseFactor() {
                 if (eat('+')) return parseFactor();
-                if (eat('-')) return -parseFactor();
-                double x;
+                if (eat('-')) {
+                    BigDecimal val = parseFactor();
+                    return val != null ? val.negate() : null;
+                }
+
+                BigDecimal x;
                 int startPos = this.pos;
-                if (eat('(')) { x = parseExpression(); eat(')'); }
-                else {
-                    while ((ch >= '0' && ch <= '9') || ch == '.') nextChar();
-                    x = Double.parseDouble(str.substring(startPos, this.pos));
+                if (eat('(')) {
+                    x = parseExpression();
+                    eat(')');
+                } else {
+                    while ((ch >= '0' && ch <= '9') || ch == '.' || ch == 'E' || ch == 'e') {
+                        nextChar();
+                        if (ch == '-' || ch == '+') {
+                            int prevPos = pos - 1;
+                            if (prevPos >= 0 && (str.charAt(prevPos) == 'E' || str.charAt(prevPos) == 'e')) {
+                                nextChar();
+                            }
+                        }
+                    }
+                    if (startPos == pos) {
+                        return null;
+                    }
+                    x = new BigDecimal(str.substring(startPos, this.pos));
                 }
                 return x;
             }

@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Week03</string>
+    <string name="create_account">Create Account</string>
+    <string name="full_name">FULL NAME</string>
+    <string name="email">EMAIL</string>
+    <string name="password">PASSWORD</string>
+    <string name="confirm_password">CONFIRM PASSWORD</string>
+    <string name="sign_up">SIGN UP</string>
+    <string name="already_have_account">Already have an account? </string>
+    <string name="sign_in">Sign in</string>
+    <string name="login">Login</string>
+    <string name="please_sign_in">Please sign in to continue</string>
+    <string name="forgot">FORGOT</string>
+    <string name="dont_have_account">Don\'t have an account? </string>
+    <string name="sign_up_text">Sign up</string>
+    <string name="back">Back</string>
+</resources>

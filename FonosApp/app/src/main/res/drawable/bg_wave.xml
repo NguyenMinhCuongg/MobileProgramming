@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="400dp"
+    android:height="300dp"
+    android:viewportWidth="400"
+    android:viewportHeight="300">
+
+    <!-- Top Wave 1 (Lightest) -->
+    <path
+        android:fillColor="#0DFF8383"
+        android:pathData="M0,0 L400,0 L400,220 C300,300 100,100 0,250 Z" />
+
+    <!-- Top Wave 2 (Middle) -->
+    <path
+        android:fillColor="#1AFF8383"
+        android:pathData="M0,0 L400,0 L400,180 C320,250 80,120 0,180 Z" />
+
+    <!-- Top Wave 3 (Main Pink Accent) -->
+    <path
+        android:fillColor="#33FF8383"
+        android:pathData="M0,0 L400,0 L400,120 C350,160 150,60 0,110 Z" />
+
+</vector>
