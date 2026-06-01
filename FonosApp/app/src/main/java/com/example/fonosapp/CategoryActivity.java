@@ -2,17 +2,22 @@ package com.example.fonosapp;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
-
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-
-import java.util.List;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import java.util.ArrayList;
 
 public class CategoryActivity extends AppCompatActivity {
 
     private BookManager bookManager;
+    private RecyclerView rvCategories;
+    private CategoryAdapter adapter;
+    private ProgressBar progressBar;
+    private ArrayList<Category> categoryList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,31 +25,48 @@ public class CategoryActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_category);
 
-        bookManager = new BookManager();
-        testSupabaseConnection();
+        rvCategories = findViewById(R.id.rvCategories);
+        progressBar = findViewById(R.id.progressBar);
 
-        // Demo: Click first category to go to Book Detail
-        findViewById(R.id.cvCategory1).setOnClickListener(v -> {
-            Intent intent = new Intent(CategoryActivity.this, BookDetailActivity.class);
-            startActivity(intent);
-        });
+        bookManager = new BookManager();
+        
+        setupRecyclerView();
+        loadCategories();
     }
 
-    private void testSupabaseConnection() {
-        bookManager.fetchCategories((categories, error) -> {
-            if (error != null) {
-                Log.e("SupabaseTest", "Error fetching categories: " + error);
-                Toast.makeText(this, "Supabase Error: " + error, Toast.LENGTH_LONG).show();
-            } else if (categories != null) {
-                Log.d("SupabaseTest", "Fetched " + categories.size() + " categories");
-                if (categories.isEmpty()) {
-                    Toast.makeText(this, "Connected to Supabase! (Table 'categories' is empty)", Toast.LENGTH_LONG).show();
+    private void setupRecyclerView() {
+        adapter = new CategoryAdapter(categoryList, category -> {
+            progressBar.setVisibility(View.VISIBLE);
+            bookManager.fetchBooksByCategory(category.getId(), (books, error) -> {
+                progressBar.setVisibility(View.GONE);
+                if (error != null) {
+                    Toast.makeText(this, "Lỗi khi tải sách: " + error, Toast.LENGTH_SHORT).show();
+                } else if (books != null && !books.isEmpty()) {
+                    // Lấy cuốn sách đầu tiên của thể loại này
+                    Book firstBook = books.get(0);
+                    Intent intent = new Intent(CategoryActivity.this, BookDetailActivity.class);
+                    intent.putExtra("BOOK_ID", firstBook.getId());
+                    startActivity(intent);
                 } else {
-                    Toast.makeText(this, "Connected! Found " + categories.size() + " categories.", Toast.LENGTH_LONG).show();
-                    for (Category cat : categories) {
-                        Log.d("SupabaseTest", "Category: " + cat.getNameVi());
-                    }
+                    Toast.makeText(this, "Không có sách nào trong thể loại này", Toast.LENGTH_SHORT).show();
                 }
+                return kotlin.Unit.INSTANCE;
+            });
+        });
+        rvCategories.setLayoutManager(new GridLayoutManager(this, 2));
+        rvCategories.setAdapter(adapter);
+    }
+
+    private void loadCategories() {
+        progressBar.setVisibility(View.VISIBLE);
+        bookManager.fetchCategories((categories, error) -> {
+            progressBar.setVisibility(View.GONE);
+            if (error != null) {
+                Toast.makeText(this, "Lỗi: " + error, Toast.LENGTH_LONG).show();
+            } else if (categories != null) {
+                categoryList.clear();
+                categoryList.addAll(categories);
+                adapter.notifyDataSetChanged();
             }
             return kotlin.Unit.INSTANCE;
         });

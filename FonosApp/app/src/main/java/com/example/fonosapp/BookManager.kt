@@ -41,6 +41,52 @@ class BookManager {
     }
 
     /**
+     * Lấy danh sách sách theo ID thể loại
+     */
+    fun fetchBooksByCategory(categoryId: String, onResult: (List<Book>?, String?) -> Unit) {
+        scope.launch {
+            try {
+                val books = withContext(Dispatchers.IO) {
+                    // Sử dụng join để lấy thông tin sách từ bảng book_categories
+                    SupabaseHelper.client.postgrest["book_categories"]
+                        .select(io.github.jan.supabase.postgrest.query.Columns.raw("*, books(*)")) {
+                            filter {
+                                eq("category_id", categoryId)
+                            }
+                        }
+                        .decodeList<BookInCategory>()
+                        .map { it.books }
+                }
+                onResult(books, null)
+            } catch (e: Exception) {
+                onResult(null, e.message)
+            }
+        }
+    }
+
+    /**
+     * Lấy thông tin chi tiết của một cuốn sách theo ID
+     */
+    fun fetchBookById(bookId: String, onResult: (Book?, String?) -> Unit) {
+        scope.launch {
+            try {
+                val book = withContext(Dispatchers.IO) {
+                    SupabaseHelper.client.postgrest["books"]
+                        .select {
+                            filter {
+                                eq("id", bookId)
+                            }
+                        }
+                        .decodeSingle<Book>()
+                }
+                onResult(book, null)
+            } catch (e: Exception) {
+                onResult(null, e.message)
+            }
+        }
+    }
+
+    /**
      * Lấy URL công khai của ảnh bìa sách từ Storage.
      * @param path: Tên file hoặc đường dẫn trong bucket (ví dụ: "covers/book1.jpg")
      */

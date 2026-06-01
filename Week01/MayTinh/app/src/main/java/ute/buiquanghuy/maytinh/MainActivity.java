@@ -1,12 +1,11 @@
 package ute.buiquanghuy.maytinh;
 
-
-import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.math.BigDecimal;
@@ -17,239 +16,426 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    TextView tvExpression, tvResult;
-    String expression = "";
-    boolean isResultShown = false;
+    private TextView tvExpression;
+    private TextView tvResult;
+
+    private String currentExpression = "";
+    private boolean resultIsShowing = false;
+
+    private static final MathContext MC = MathContext.DECIMAL128;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        initViews();
+        setupCalculatorButtons();
+    }
+
+    private void initViews() {
         tvExpression = findViewById(R.id.tvExpression);
         tvResult = findViewById(R.id.tvResult);
-        GridLayout grid = findViewById(R.id.mainGrid);
-
-        if (grid != null) {
-            for (int i = 0; i < grid.getChildCount(); i++) {
-                View v = grid.getChildAt(i);
-                if (v instanceof Button) {
-                    v.setOnClickListener(this::onClick);
-                }
-            }
-        }
     }
 
-    private void onClick(View v) {
-        Button btn = (Button) v;
-        String text = btn.getText().toString();
+    private void setupCalculatorButtons() {
+        GridLayout mainGrid = findViewById(R.id.mainGrid);
 
-        switch (text) {
-            case "AC":
-                expression = "";
-                tvExpression.setText("");
-                tvResult.setText("0");
-                isResultShown = false;
-                break;
-            case "⌫":
-                if (isResultShown) {
-                    isResultShown = false;
-                } else if (!expression.isEmpty()) {
-                    expression = expression.substring(0, expression.length() - 1);
-                }
-                tvExpression.setText(expression);
-                liveCalculate();
-                break;
-            case "( )":
-                handleParentheses();
-                break;
-            case "=":
-                if (!expression.isEmpty()) {
-                    calculateFinal();
-                    isResultShown = true;
-                }
-                break;
-            case "+": case "-": case "×": case "÷": case "%":
-                isResultShown = false;
-                handleOperator(text);
-                break;
-            default:
-                if (isResultShown) {
-                    expression = text;
-                    isResultShown = false;
-                } else {
-                    expression += text;
-                }
-                tvExpression.setText(expression);
-                liveCalculate();
-                break;
-        }
-    }
-
-    private void handleParentheses() {
-        if (isResultShown) {
-            expression = "";
-            isResultShown = false;
-        }
-        int open = 0, close = 0;
-        for (char c : expression.toCharArray()) {
-            if (c == '(') open++;
-            if (c == ')') close++;
-        }
-        if (open == close || expression.endsWith("(")) {
-            expression += "(";
-        } else {
-            expression += ")";
-        }
-        tvExpression.setText(expression);
-        liveCalculate();
-    }
-
-    private void handleOperator(String op) {
-        if (!expression.isEmpty()) {
-            char last = expression.charAt(expression.length() - 1);
-            if ("+-(×÷%".indexOf(last) != -1) {
-                expression = expression.substring(0, expression.length() - 1);
-            }
-            expression += op;
-            tvExpression.setText(expression);
-        } else if (op.equals("-")) {
-            expression += op;
-            tvExpression.setText(expression);
-        }
-    }
-
-    private String formatResult(BigDecimal bd) {
-        if (bd.compareTo(BigDecimal.ZERO) == 0) return "0";
-
-        bd = bd.stripTrailingZeros();
-        String plain = bd.toPlainString();
-
-        if (plain.length() > 15) {
-            DecimalFormat df = new DecimalFormat("0.########E0", new DecimalFormatSymbols(Locale.US));
-            return df.format(bd);
-        }
-        return plain;
-    }
-
-    private void liveCalculate() {
-        if (expression.isEmpty()) {
-            tvResult.setText("0");
+        if (mainGrid == null) {
             return;
         }
-        try {
-            BigDecimal result = eval(formatExpression(expression));
-            tvResult.setText(formatResult(result));
-        } catch (Exception e) {
-            tvResult.setText("");
+
+        for (int i = 0; i < mainGrid.getChildCount(); i++) {
+            View child = mainGrid.getChildAt(i);
+
+            if (child instanceof Button) {
+                child.setOnClickListener(view -> {
+                    Button button = (Button) view;
+                    String value = button.getText().toString();
+                    processButton(value);
+                });
+            }
         }
     }
 
-    private void calculateFinal() {
+    private void processButton(String value) {
+        if (value.equals("AC")) {
+            clearCalculator();
+            return;
+        }
+
+        if (value.equals("⌫")) {
+            deleteLastCharacter();
+            return;
+        }
+
+        if (value.equals("( )")) {
+            addParenthesis();
+            return;
+        }
+
+        if (value.equals("=")) {
+            showFinalResult();
+            return;
+        }
+
+        if (isOperator(value)) {
+            addOperator(value);
+            return;
+        }
+
+        addNumberOrDot(value);
+    }
+
+    private void clearCalculator() {
+        currentExpression = "";
+        resultIsShowing = false;
+
+        tvExpression.setText("");
+        tvResult.setText("0");
+    }
+
+    private void deleteLastCharacter() {
+        if (resultIsShowing) {
+            resultIsShowing = false;
+        } else if (!currentExpression.isEmpty()) {
+            currentExpression = currentExpression.substring(0, currentExpression.length() - 1);
+        }
+
+        refreshExpression();
+        calculatePreview();
+    }
+
+    private void addParenthesis() {
+        if (resultIsShowing) {
+            currentExpression = "";
+            resultIsShowing = false;
+        }
+
+        int openCount = countCharacter(currentExpression, '(');
+        int closeCount = countCharacter(currentExpression, ')');
+
+        if (openCount == closeCount || currentExpression.endsWith("(")) {
+            currentExpression += "(";
+        } else {
+            currentExpression += ")";
+        }
+
+        refreshExpression();
+        calculatePreview();
+    }
+
+    private int countCharacter(String text, char target) {
+        int count = 0;
+
+        for (int i = 0; i < text.length(); i++) {
+            if (text.charAt(i) == target) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    private void showFinalResult() {
+        if (currentExpression.isEmpty()) {
+            return;
+        }
+
         try {
-            BigDecimal result = eval(formatExpression(expression));
-            expression = formatResult(result);
-            tvExpression.setText(expression);
+            String convertedExpression = convertExpression(currentExpression);
+            BigDecimal result = ExpressionParser.calculate(convertedExpression);
+
+            currentExpression = formatNumber(result);
+            resultIsShowing = true;
+
+            tvExpression.setText(currentExpression);
             tvResult.setText("");
         } catch (Exception e) {
             tvResult.setText("Error");
         }
     }
 
-    private String formatExpression(String exp) {
-        return exp.replaceAll("([0-9.E+-]+)%", "($1/100.0)")
-                .replace("×", "*")
-                .replace("÷", "/");
+    private void addOperator(String operator) {
+        resultIsShowing = false;
+
+        if (currentExpression.isEmpty()) {
+            if (operator.equals("-")) {
+                currentExpression = "-";
+                refreshExpression();
+            }
+            return;
+        }
+
+        char lastChar = currentExpression.charAt(currentExpression.length() - 1);
+
+        /*
+         * Trường hợp đặc biệt:
+         * Nếu phía trước là dấu "(" thì không được xóa dấu "(".
+         * Chỉ cho phép thêm dấu + hoặc - sau "(".
+         *
+         * Ví dụ hợp lệ:
+         * 5×(-3)
+         * 5×(+3)
+         */
+        if (lastChar == '(') {
+            if (operator.equals("+") || operator.equals("-")) {
+                currentExpression += operator;
+                refreshExpression();
+            }
+            return;
+        }
+
+        /*
+         * Nếu ký tự cuối là toán tử thật sự thì thay toán tử cũ.
+         * Lưu ý: không tính dấu "(" là toán tử để tránh lỗi mất ngoặc.
+         */
+        if (isLastCharOperator(lastChar)) {
+            currentExpression = currentExpression.substring(0, currentExpression.length() - 1);
+        }
+
+        currentExpression += operator;
+        refreshExpression();
     }
 
-    public static BigDecimal eval(final String str) {
-        return new Object() {
-            int pos = -1, ch;
+    private void addNumberOrDot(String value) {
+        if (resultIsShowing) {
+            currentExpression = value;
+            resultIsShowing = false;
+        } else {
+            currentExpression += value;
+        }
 
-            void nextChar() {
-                ch = (++pos < str.length()) ? str.charAt(pos) : -1;
+        refreshExpression();
+        calculatePreview();
+    }
+
+    private boolean isOperator(String value) {
+        return value.equals("+")
+                || value.equals("-")
+                || value.equals("×")
+                || value.equals("÷")
+                || value.equals("%");
+    }
+
+    private boolean isLastCharOperator(char c) {
+        return c == '+'
+                || c == '-'
+                || c == '×'
+                || c == '÷'
+                || c == '%';
+    }
+
+    private void refreshExpression() {
+        tvExpression.setText(currentExpression);
+    }
+
+    private void calculatePreview() {
+        if (currentExpression.isEmpty()) {
+            tvResult.setText("0");
+            return;
+        }
+
+        try {
+            String convertedExpression = convertExpression(currentExpression);
+            BigDecimal result = ExpressionParser.calculate(convertedExpression);
+
+            tvResult.setText(formatNumber(result));
+        } catch (Exception e) {
+            tvResult.setText("");
+        }
+    }
+
+    private String convertExpression(String expression) {
+        String newExpression = expression;
+
+        newExpression = newExpression.replaceAll("([0-9.E+-]+)%", "($1/100.0)");
+        newExpression = newExpression.replace("×", "*");
+        newExpression = newExpression.replace("÷", "/");
+
+        return newExpression;
+    }
+
+    private String formatNumber(BigDecimal number) {
+        if (number.compareTo(BigDecimal.ZERO) == 0) {
+            return "0";
+        }
+
+        BigDecimal cleanNumber = number.stripTrailingZeros();
+        String plainText = cleanNumber.toPlainString();
+
+        if (plainText.length() > 15) {
+            DecimalFormat formatter = new DecimalFormat(
+                    "0.########E0",
+                    new DecimalFormatSymbols(Locale.US)
+            );
+            return formatter.format(cleanNumber);
+        }
+
+        return plainText;
+    }
+
+    private static class ExpressionParser {
+
+        private final String input;
+        private int index;
+        private char currentChar;
+
+        private ExpressionParser(String input) {
+            this.input = input;
+            this.index = -1;
+            moveNext();
+        }
+
+        public static BigDecimal calculate(String input) {
+            ExpressionParser parser = new ExpressionParser(input);
+            BigDecimal value = parser.parseExpression();
+
+            if (value == null) {
+                return BigDecimal.ZERO;
             }
 
-            boolean eat(int charToEat) {
-                while (ch == ' ') nextChar();
-                if (ch == charToEat) {
-                    nextChar();
-                    return true;
-                }
-                return false;
+            return value;
+        }
+
+        private void moveNext() {
+            index++;
+
+            if (index < input.length()) {
+                currentChar = input.charAt(index);
+            } else {
+                currentChar = '\0';
+            }
+        }
+
+        private void skipSpaces() {
+            while (currentChar == ' ') {
+                moveNext();
+            }
+        }
+
+        private boolean accept(char expected) {
+            skipSpaces();
+
+            if (currentChar == expected) {
+                moveNext();
+                return true;
             }
 
-            BigDecimal parse() {
-                nextChar();
-                BigDecimal x = parseExpression();
-                if (x == null) x = BigDecimal.ZERO;
-                return x;
-            }
+            return false;
+        }
 
-            BigDecimal parseExpression() {
-                BigDecimal x = parseTerm();
-                for (;;) {
-                    if (eat('+')) {
-                        BigDecimal y = parseTerm();
-                        if (x == null) x = y;
-                        else if (y != null) x = x.add(y, MathContext.DECIMAL128);
-                    } else if (eat('-')) {
-                        BigDecimal y = parseTerm();
-                        if (x == null) x = (y != null) ? y.negate() : null;
-                        else if (y != null) x = x.subtract(y, MathContext.DECIMAL128);
-                    } else return x;
-                }
-            }
+        private BigDecimal parseExpression() {
+            BigDecimal result = parseTerm();
 
-            BigDecimal parseTerm() {
-                BigDecimal x = parseFactor();
-                for (;;) {
-                    if (eat('*')) {
-                        BigDecimal y = parseFactor();
-                        if (x == null) x = y;
-                        else if (y != null) x = x.multiply(y, MathContext.DECIMAL128);
-                    } else if (eat('/')) {
-                        BigDecimal y = parseFactor();
-                        if (x == null) x = y;
-                        else if (y != null) {
-                            if (y.compareTo(BigDecimal.ZERO) == 0) {
-                                throw new ArithmeticException("Divide by zero");
-                            }
-                            x = x.divide(y, MathContext.DECIMAL128);
-                        }
-                    } else return x;
-                }
-            }
+            while (true) {
+                if (accept('+')) {
+                    BigDecimal nextValue = parseTerm();
 
-            BigDecimal parseFactor() {
-                if (eat('+')) return parseFactor();
-                if (eat('-')) {
-                    BigDecimal val = parseFactor();
-                    return val != null ? val.negate() : null;
-                }
+                    if (result == null) {
+                        result = nextValue;
+                    } else if (nextValue != null) {
+                        result = result.add(nextValue, MC);
+                    }
 
-                BigDecimal x;
-                int startPos = this.pos;
-                if (eat('(')) {
-                    x = parseExpression();
-                    eat(')');
+                } else if (accept('-')) {
+                    BigDecimal nextValue = parseTerm();
+
+                    if (result == null) {
+                        result = nextValue == null ? null : nextValue.negate();
+                    } else if (nextValue != null) {
+                        result = result.subtract(nextValue, MC);
+                    }
+
                 } else {
-                    while ((ch >= '0' && ch <= '9') || ch == '.' || ch == 'E' || ch == 'e') {
-                        nextChar();
-                        if (ch == '-' || ch == '+') {
-                            int prevPos = pos - 1;
-                            if (prevPos >= 0 && (str.charAt(prevPos) == 'E' || str.charAt(prevPos) == 'e')) {
-                                nextChar();
-                            }
+                    return result;
+                }
+            }
+        }
+
+        private BigDecimal parseTerm() {
+            BigDecimal result = parseFactor();
+
+            while (true) {
+                if (accept('*')) {
+                    BigDecimal nextValue = parseFactor();
+
+                    if (result == null) {
+                        result = nextValue;
+                    } else if (nextValue != null) {
+                        result = result.multiply(nextValue, MC);
+                    }
+
+                } else if (accept('/')) {
+                    BigDecimal nextValue = parseFactor();
+
+                    if (result == null) {
+                        result = nextValue;
+                    } else if (nextValue != null) {
+                        if (nextValue.compareTo(BigDecimal.ZERO) == 0) {
+                            throw new ArithmeticException("Divide by zero");
+                        }
+
+                        result = result.divide(nextValue, MC);
+                    }
+
+                } else {
+                    return result;
+                }
+            }
+        }
+
+        private BigDecimal parseFactor() {
+            if (accept('+')) {
+                return parseFactor();
+            }
+
+            if (accept('-')) {
+                BigDecimal value = parseFactor();
+                return value == null ? null : value.negate();
+            }
+
+            if (accept('(')) {
+                BigDecimal insideValue = parseExpression();
+                accept(')');
+                return insideValue;
+            }
+
+            return parseNumber();
+        }
+
+        private BigDecimal parseNumber() {
+            int startIndex = index;
+
+            while (isNumberCharacter(currentChar)) {
+                moveNext();
+
+                if (currentChar == '+' || currentChar == '-') {
+                    int previousIndex = index - 1;
+
+                    if (previousIndex >= 0) {
+                        char previousChar = input.charAt(previousIndex);
+
+                        if (previousChar == 'E' || previousChar == 'e') {
+                            moveNext();
                         }
                     }
-                    if (startPos == pos) {
-                        return null;
-                    }
-                    x = new BigDecimal(str.substring(startPos, this.pos));
                 }
-                return x;
             }
-        }.parse();
+
+            if (startIndex == index) {
+                return null;
+            }
+
+            String numberText = input.substring(startIndex, index);
+            return new BigDecimal(numberText);
+        }
+
+        private boolean isNumberCharacter(char c) {
+            return (c >= '0' && c <= '9')
+                    || c == '.'
+                    || c == 'E'
+                    || c == 'e';
+        }
     }
 }

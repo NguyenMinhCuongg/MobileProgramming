@@ -1,0 +1,28 @@
+# Hệ thống & Rác
+.DS_Store
+Thumbs.db
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+.gradle/
+
+# Các file nén (tránh đẩy các bản backup zip lên GitHub)
+*.zip
+
+# Local cấu hình cá nhân
+local.properties
+
+# Các file build của project
+build/
+app/build/
+
+# Ẩn các bài tập tuần cũ để tập trung vào FonosApp
+Week01/
+Week02/
+Week03/
+Week03_Ex2/
+Week03_Ex3/
+Week05+06/
+Week07+08/
+Week07+08(Ex02)/
