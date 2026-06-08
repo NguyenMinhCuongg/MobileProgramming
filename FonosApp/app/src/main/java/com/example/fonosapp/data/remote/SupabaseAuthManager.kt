@@ -1,7 +1,9 @@
-package com.example.fonosapp
+package com.example.fonosapp.data.remote
 
+import com.example.fonosapp.data.models.Profile
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
+import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -39,6 +41,25 @@ class SupabaseAuthManager(private val onResult: (Boolean, String?) -> Unit) {
                 onResult(true, null)
             } catch (e: Exception) {
                 onResult(false, e.message)
+            }
+        }
+    }
+
+    fun fetchUserProfile(userId: String, onProfileResult: (Profile?, String?) -> Unit) {
+        scope.launch {
+            try {
+                val profile = withContext(Dispatchers.IO) {
+                    SupabaseHelper.client.postgrest["profiles"]
+                        .select {
+                            filter {
+                                eq("id", userId)
+                            }
+                        }
+                        .decodeSingle<Profile>()
+                }
+                onProfileResult(profile, null)
+            } catch (e: Exception) {
+                onProfileResult(null, e.message)
             }
         }
     }

@@ -1,5 +1,8 @@
-package com.example.fonosapp
+package com.example.fonosapp.data.remote
 
+import com.example.fonosapp.data.models.Book
+import com.example.fonosapp.data.models.BookChapter
+import com.example.fonosapp.data.models.Category
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.CoroutineScope
@@ -40,22 +43,17 @@ class BookManager {
         }
     }
 
-    /**
-     * Lấy danh sách sách theo ID thể loại
-     */
     fun fetchBooksByCategory(categoryId: String, onResult: (List<Book>?, String?) -> Unit) {
         scope.launch {
             try {
                 val books = withContext(Dispatchers.IO) {
-                    // Sử dụng join để lấy thông tin sách từ bảng book_categories
-                    SupabaseHelper.client.postgrest["book_categories"]
-                        .select(io.github.jan.supabase.postgrest.query.Columns.raw("*, books(*)")) {
+                    SupabaseHelper.client.postgrest["books"]
+                        .select {
                             filter {
                                 eq("category_id", categoryId)
                             }
                         }
-                        .decodeList<BookInCategory>()
-                        .map { it.books }
+                        .decodeList<Book>()
                 }
                 onResult(books, null)
             } catch (e: Exception) {
@@ -64,9 +62,6 @@ class BookManager {
         }
     }
 
-    /**
-     * Lấy thông tin chi tiết của một cuốn sách theo ID
-     */
     fun fetchBookById(bookId: String, onResult: (Book?, String?) -> Unit) {
         scope.launch {
             try {
@@ -86,10 +81,25 @@ class BookManager {
         }
     }
 
-    /**
-     * Lấy URL công khai của ảnh bìa sách từ Storage.
-     * @param path: Tên file hoặc đường dẫn trong bucket (ví dụ: "covers/book1.jpg")
-     */
+    fun fetchChapters(bookId: String, onResult: (List<BookChapter>?, String?) -> Unit) {
+        scope.launch {
+            try {
+                val chapters = withContext(Dispatchers.IO) {
+                    SupabaseHelper.client.postgrest["book_chapters"]
+                        .select {
+                            filter {
+                                eq("book_id", bookId)
+                            }
+                        }
+                        .decodeList<BookChapter>()
+                }
+                onResult(chapters, null)
+            } catch (e: Exception) {
+                onResult(null, e.message)
+            }
+        }
+    }
+
     fun getBookCoverUrl(path: String): String {
         return SupabaseHelper.client.storage.from("books").publicUrl(path)
     }

@@ -1,4 +1,4 @@
-package com.example.fonosapp;
+package com.example.fonosapp.ui.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,19 +8,21 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+
 import com.bumptech.glide.Glide;
+import com.example.fonosapp.R;
+import com.example.fonosapp.data.models.Book;
+import com.example.fonosapp.data.remote.BookManager;
+import com.example.fonosapp.utils.AppNavigator;
 
 public class BookDetailActivity extends AppCompatActivity {
 
     private BookManager bookManager;
     private ImageView ivBookCover;
-    private TextView tvBookTitle, tvAuthor, tvSummaryContent, tvRating;
-    private View progressBar;
+    private TextView tvBookTitle, tvAuthor, tvSummaryContent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,8 +36,6 @@ public class BookDetailActivity extends AppCompatActivity {
         String bookId = getIntent().getStringExtra("BOOK_ID");
         if (bookId != null) {
             loadBookDetails(bookId);
-        } else {
-            Toast.makeText(this, "Không tìm thấy ID sách", Toast.LENGTH_SHORT).show();
         }
 
         ImageButton btnBack = findViewById(R.id.btnBack);
@@ -43,8 +43,14 @@ public class BookDetailActivity extends AppCompatActivity {
 
         Button btnListen = findViewById(R.id.btnListen);
         btnListen.setOnClickListener(v -> {
-            Intent intent = new Intent(BookDetailActivity.this, PlayerActivity.class);
-            startActivity(intent);
+            // Implicit Intent: Chia sẻ thông tin sách
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("text/plain");
+            shareIntent.putExtra(Intent.EXTRA_TEXT, "Đang nghe cuốn sách: " + tvBookTitle.getText());
+            startActivity(Intent.createChooser(shareIntent, "Chia sẻ sách"));
+            
+            // Navigate mượt mà tới Player
+            AppNavigator.navigateTo(this, PlayerActivity.class, false);
         });
     }
 
@@ -53,8 +59,6 @@ public class BookDetailActivity extends AppCompatActivity {
         tvBookTitle = findViewById(R.id.tvBookTitle);
         tvAuthor = findViewById(R.id.tvAuthor);
         tvSummaryContent = findViewById(R.id.tvSummaryContent);
-        // Lưu ý: tvRating và progressBar cần được thêm vào XML nếu chưa có, 
-        // hoặc tôi sẽ dùng các ID hiện có trong activity_book_detail.xml
     }
 
     private void loadBookDetails(String bookId) {
@@ -72,7 +76,6 @@ public class BookDetailActivity extends AppCompatActivity {
         tvBookTitle.setText(book.getTitle());
         tvSummaryContent.setText(book.getDescription());
         
-        // Load ảnh bằng Glide
         if (book.getCoverUrl() != null) {
             Glide.with(this)
                  .load(book.getCoverUrl())
@@ -80,7 +83,6 @@ public class BookDetailActivity extends AppCompatActivity {
                  .into(ivBookCover);
         }
 
-        // Tạm thời hiển thị ID tác giả (cần fetch thêm Author để hiện tên đẹp hơn)
         tvAuthor.setText("Tác giả ID: " + book.getAuthorId());
     }
 }

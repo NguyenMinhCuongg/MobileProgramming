@@ -1,0 +1,42 @@
+===========================================================
+DANH SÁCH CÁC THAY ĐỔI VÀ TÍNH NĂNG MỚI - FONOS APP REFACTOR
+===========================================================
+
+1. CẤU TRÚC THƯ MỤC (PROJECT STRUCTURE)
+---------------------------------------
+Sắp xếp lại theo mô hình Clean Architecture thu gọn:
+- ui.activities: Quản lý các màn hình (Login, SignUp, Category, Detail, Player).
+- ui.adapters: Quản lý các bộ đổ dữ liệu lên RecyclerView.
+- data.remote: Quản lý kết nối Supabase (Helper, Managers).
+- data.models: Định nghĩa các đối tượng theo Database Schema mới.
+- services: Các dịch vụ chạy nền (Java).
+- utils: Các công cụ hỗ trợ (Notification, Animations, Constants).
+
+2. CÁC SERVICE ĐÃ TÍCH HỢP (JAVA ONLY)
+--------------------------------------
+- AudioPlaybackService (Foreground Service): Xử lý phát nhạc chạy nền, tích hợp MediaSession.
+- NotificationService: Quản lý Notification Channel và cập nhật thông báo realtime.
+- ProgressSyncWorker (WorkManager): Tự động đồng bộ tiến trình đọc/nghe lên Supabase mỗi khi có thay đổi.
+- ConnectivityReceiver (BroadcastReceiver): Theo dõi trạng thái mạng để thông báo cho người dùng.
+- Bound Service: Kết nối Activity với Service phát nhạc để điều khiển mượt mà.
+
+3. CẢI THIỆN UI/UX & ANIMATIONS
+-------------------------------
+- Hiệu ứng Chuyển cảnh (Activity Transitions): Dùng Slide/Fade khi chuyển màn hình.
+- Hiệu ứng CardView & Elevation: Tạo độ nổi khối cho bìa sách.
+- Gradient Background: Tự động thay đổi màu nền theo dữ liệu từ database.
+- Lottie/View Animations: Thêm hiệu ứng loading và các tương tác nút bấm mượt mà.
+- Nâng cấp màn hình Player: Thiết kế hiện đại, dĩa quay (nếu cần), thanh progress bar tùy chỉnh.
+
+4. LOGIC DATABASE MỚI
+---------------------
+- Hỗ trợ đầy đủ: Profiles, Authors, Chapters, Reviews, và User Library.
+- Xử lý logic mua sách (Purchasing) và tính toán giờ nghe (Listening Hours).
+
+5. TỔ CHỨC LẠI PACKAGES (REFRESH)
+----------------------------------
+- com.example.fonosapp.ui: Chứa Activity, Adapter.
+- com.example.fonosapp.services: Chứa các loại Service (Foreground, Bound, JobIntent, Broadcast).
+- com.example.fonosapp.data: Chứa Models (Java) và Remote (Supabase).
+- com.example.fonosapp.utils: Chứa Navigator, Notifications, Extensions.
+===========================================================

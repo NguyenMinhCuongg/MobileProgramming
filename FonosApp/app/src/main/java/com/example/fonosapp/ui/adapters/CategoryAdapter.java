@@ -1,12 +1,18 @@
-package com.example.fonosapp;
+package com.example.fonosapp.ui.adapters;
 
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.fonosapp.R;
+import com.example.fonosapp.data.models.Category;
+import com.example.fonosapp.utils.ViewExtensions;
+
 import java.util.List;
 
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder> {
@@ -35,18 +41,26 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
         Category category = categories.get(position);
         holder.tvName.setText(category.getNameVi());
         
-        // Thử thiết lập màu từ gradient_colors nếu có
-        if (category.getGradientColors() != null && !category.getGradientColors().isEmpty()) {
+        if (category.getGradientColors() != null && category.getGradientColors().size() >= 2) {
             try {
-                int color = Color.parseColor(category.getGradientColors().get(0));
-                holder.vBackground.setBackgroundColor(color);
-                holder.tvName.setTextColor(color);
+                int color1 = Color.parseColor(category.getGradientColors().get(0));
+                int color2 = Color.parseColor(category.getGradientColors().get(1));
+                
+                GradientDrawable gd = new GradientDrawable(
+                        GradientDrawable.Orientation.TOP_BOTTOM,
+                        new int[] {color1, color2});
+                gd.setCornerRadius(30f);
+                holder.vBackground.setBackground(gd);
+                holder.tvName.setTextColor(Color.WHITE);
             } catch (Exception e) {
-                // Fallback nếu parse màu lỗi
+                holder.vBackground.setBackgroundColor(Color.LTGRAY);
             }
         }
 
-        holder.itemView.setOnClickListener(v -> listener.onCategoryClick(category));
+        holder.itemView.setOnClickListener(v -> {
+            ViewExtensions.pulse(v);
+            v.postDelayed(() -> listener.onCategoryClick(category), 200);
+        });
     }
 
     @Override
@@ -54,9 +68,9 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
         return categories.size();
     }
 
-    static class CategoryViewHolder extends RecyclerView.ViewHolder {
-        TextView tvName;
-        View vBackground;
+    public static class CategoryViewHolder extends RecyclerView.ViewHolder {
+        public TextView tvName;
+        public View vBackground;
 
         public CategoryViewHolder(@NonNull View itemView) {
             super(itemView);

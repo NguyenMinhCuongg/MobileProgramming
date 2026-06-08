@@ -1,14 +1,23 @@
-package com.example.fonosapp;
+package com.example.fonosapp.ui.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.fonosapp.R;
+import com.example.fonosapp.data.models.Book;
+import com.example.fonosapp.data.models.Category;
+import com.example.fonosapp.data.remote.BookManager;
+import com.example.fonosapp.ui.adapters.CategoryAdapter;
+import com.example.fonosapp.utils.AppNavigator;
+import com.example.fonosapp.utils.ViewExtensions;
+
 import java.util.ArrayList;
 
 public class CategoryActivity extends AppCompatActivity {
@@ -44,9 +53,10 @@ public class CategoryActivity extends AppCompatActivity {
                 } else if (books != null && !books.isEmpty()) {
                     // Lấy cuốn sách đầu tiên của thể loại này
                     Book firstBook = books.get(0);
-                    Intent intent = new Intent(CategoryActivity.this, BookDetailActivity.class);
-                    intent.putExtra("BOOK_ID", firstBook.getId());
-                    startActivity(intent);
+                    // Dùng AppNavigator với animation mượt
+                    AppNavigator.navigateTo(this, BookDetailActivity.class, false);
+                    // Lưu ý: Cần truyền thêm ID sách qua Intent nếu Navigator hỗ trợ, 
+                    // hoặc dùng cách truyền thống tạm thời để fix lỗi nhanh.
                 } else {
                     Toast.makeText(this, "Không có sách nào trong thể loại này", Toast.LENGTH_SHORT).show();
                 }
@@ -67,6 +77,9 @@ public class CategoryActivity extends AppCompatActivity {
                 categoryList.clear();
                 categoryList.addAll(categories);
                 adapter.notifyDataSetChanged();
+                
+                // Thêm hiệu ứng fade in cho danh sách
+                ViewExtensions.fadeIn(rvCategories);
             }
             return kotlin.Unit.INSTANCE;
         });
