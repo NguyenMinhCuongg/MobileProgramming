@@ -1,6 +1,7 @@
 package com.example.fonosapp.ui.activities;
 
 import android.content.ComponentName;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
@@ -63,6 +64,12 @@ public class PlayerActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        
+        // Start Service (Explicitly for report requirements)
+        Intent serviceIntent = new Intent(this, AudioPlaybackService.class);
+        startForegroundService(serviceIntent);
+
+        // Kết nối tới AudioPlaybackService (Bound Service logic)
         SessionToken sessionToken = new SessionToken(this, new ComponentName(this, AudioPlaybackService.class));
         controllerFuture = new MediaController.Builder(this, sessionToken).buildAsync();
         controllerFuture.addListener(() -> {
